@@ -80,6 +80,10 @@ $(function() {
             var self = this;
 
             self.initCameraSelection();
+
+            //TODO:
+            // self.setState({'decoder.readers': [{"format":"ean_reader","config":{}}]});
+
             $(".controls").on("click", "button.stop", function(e) {
                 e.preventDefault();
                 Quagga.stop();
