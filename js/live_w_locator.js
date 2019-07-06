@@ -1,4 +1,3 @@
-var init = true;
 $(function () {
     var App = {
         init: function () {
@@ -15,8 +14,10 @@ $(function () {
         checkCapabilities: function () {
             var track = Quagga.CameraAccess.getActiveTrack();
             var capabilities = {};
-            if (typeof track.getCapabilities === 'function') {
-                capabilities = track.getCapabilities();
+            if (typeof track !== 'undefined') {
+                if (typeof track.getCapabilities === 'function') {
+                    capabilities = track.getCapabilities();
+                }
             }
         },
         updateOptionsForMediaRange: function (node, range) {
@@ -78,19 +79,7 @@ $(function () {
         attachListeners: function () {
             var self = this;
 
-            // $(document).ready(function () {
-            //     if(init){
-            //         self.setState("decoder.readers", "ean");
-            //         init = false;
-            //     }
-            // });
-
             self.initCameraSelection();
-
-            $(".controls").on("click", "button.stop", function (e) {
-                e.preventDefault();
-                Quagga.stop();
-            });
 
             $(".controls .reader-config-group").on("change", "input, select", function (e) {
                 e.preventDefault();
@@ -125,7 +114,6 @@ $(function () {
             });
         },
         detachListeners: function () {
-            $(".controls").off("click", "button.stop");
             $(".controls .reader-config-group").off("change", "input, select");
         },
         setState: function (path, value) {
@@ -170,18 +158,8 @@ $(function () {
             },
             decoder: {
                 readers: function (value) {
-                    if (value === 'ean_extended') {
-                        return [{
-                            format: "ean_reader",
-                            config: {
-                                supplements: [
-                                    'ean_5_reader', 'ean_2_reader'
-                                ]
-                            }
-                        }];
-                    }
                     return [{
-                        format: value + "_reader",
+                        format: "ean_reader",
                         config: {}
                     }];
                 }
@@ -212,7 +190,7 @@ $(function () {
             frequency: 10,
             decoder: {
                 readers: [{
-                    format: "code_128_reader",
+                    format: "ean_reader",
                     config: {}
                 }]
             },
@@ -268,15 +246,20 @@ $(function () {
     Quagga.onDetected(function (result) {
         var code = result.codeResult.code;
 
-        if (App.lastResult !== code) {
-            App.lastResult = code;
-            var $node = null,
-                canvas = Quagga.canvas.dom.image;
+        if (code.startsWith(codePrefixValue) && codeLenValue == code.length) {
+            if (App.lastResult !== code) {
+                App.lastResult = code;
+                var $node = null,
+                    canvas = Quagga.canvas.dom.image;
 
-            $node = $('<li><div class="thumbnail"><div class="imgWrapper"><img /></div><div class="caption"><h4 class="code"></h4></div></div></li>');
-            $node.find("img").attr("src", canvas.toDataURL());
-            $node.find("h4.code").html(code);
-            $("#result_strip ul.thumbnails").prepend($node);
+                $node = $('<li><div class="thumbnail"><div class="imgWrapper"><img /></div><div class="caption"><h4 class="code"></h4></div></div></li>');
+                $node.find("img").attr("src", canvas.toDataURL());
+                $node.find("h4.code").html(code);
+                $("#result_strip ul.thumbnails").prepend($node);
+            }
         }
     });
+
+    codeLenValue = parseInt(document.querySelector('input#codeLen').value);
+    codePrefixValue = document.querySelector('input#codePrefix').value;
 });

@@ -19,64 +19,64 @@
 
 <body>
     <div class="wrapper">
-        <section>
-            <section id="container" class="container">
-                <div class="controls">
-                    <fieldset class="input-group">
-                        <button class="stop">Stop</button>
-                    </fieldset>
-                    <fieldset class="reader-config-group">
-                        <label>
-                            <span>Barcode-Type</span>
-                            <select name="decoder_readers">
-                                <option value="code_128">Code 128</option>
-                                <option value="ean" selected="selected">EAN</option>
-                            </select>
-                        </label>
-                        <label>
-                            <span>Resolution (long side)</span>
-                            <select name="input-stream_constraints">
-                                <option value="320x240">320px</option>
-                                <option selected="selected" value="640x480">640px</option>
-                            </select>
-                        </label>
-                        <label>
-                            <span>Patch-Size</span>
-                            <select name="locator_patch-size">
-                                <option selected="selected" value="medium">medium</option>
-                            </select>
-                        </label>
-                        <label>
-                            <span>Half-Sample</span>
-                            <input type="checkbox" checked="checked" name="locator_half-sample" />
-                        </label>
-                        <label>
-                            <span>Workers</span>
-                            <select name="numOfWorkers">
-                                <option selected="selected" value="4">4</option>
-                            </select>
-                        </label>
-                        <label>
-                            <span>Camera</span>
-                            <select name="input-stream_constraints" id="deviceSelection">
-                            </select>
-                        </label>
-                    </fieldset>
-                </div>
-                <div id="result_strip">
-                    <ul class="thumbnails"></ul>
-                </div>
-                <div id="interactive" class="viewport"></div>
-            </section>
-
-            <script src="js/jquery-1.11.0.min.js"></script>
-            <script src="js/adapter-latest.js" type="text/javascript"></script>
-            <script src="js/quagga.min.js" type="text/javascript"></script>
-            <script src="js/live_w_locator.js" type="text/javascript"></script>
-
-
+        <section id="container" class="container">
+            <div class="controls">
+                <fieldset class="reader-config-group">
+                    <label>
+                        <span>Length</span>
+                        <input type="number" value="13" id="codeLen" name="codeLen" />
+                    </label>
+                    <label>
+                        <span>Prefix</span>
+                        <input type="number" value="978" id="codePrefix" name="codePrefix" />
+                    </label>
+                    <label>
+                        <span>Barcode-Type</span>
+                        <select name="decoder_readers">
+                            <option value="code_128">Code 128</option>
+                            <option value="ean" selected="selected">EAN</option>
+                        </select>
+                    </label>
+                    <label>
+                        <span>Resolution (long side)</span>
+                        <select name="input-stream_constraints">
+                            <option value="320x240">320px</option>
+                            <option selected="selected" value="640x480">640px</option>
+                        </select>
+                    </label>
+                    <label>
+                        <span>Patch-Size</span>
+                        <select name="locator_patch-size">
+                            <option selected="selected" value="medium">medium</option>
+                        </select>
+                    </label>
+                    <label>
+                        <span>Half-Sample</span>
+                        <input type="checkbox" checked="checked" name="locator_half-sample" />
+                    </label>
+                    <label>
+                        <span>Workers</span>
+                        <select name="numOfWorkers">
+                            <option selected="selected" value="4">4</option>
+                        </select>
+                    </label>
+                    <label>
+                        <span>Camera</span>
+                        <select name="input-stream_constraints" id="deviceSelection">
+                        </select>
+                    </label>
+                </fieldset>
+            </div>
+            <div id="result_strip">
+                <ul class="thumbnails"></ul>
+            </div>
+            <div id="interactive" class="viewport"></div>
         </section>
     </div>
+    <script src="js/adapter-latest.js" type="text/javascript"></script>
+    <script src="js/jquery-1.11.0.min.js"></script>
+    <script src="js/live_w_locator.js" type="text/javascript"></script>
+    <script src="js/quagga.min.js" type="text/javascript"></script>
     <script src="js/scale.fix.js"></script>
 </body>
 
