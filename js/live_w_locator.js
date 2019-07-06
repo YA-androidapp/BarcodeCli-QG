@@ -1,7 +1,8 @@
-$(function() {
+var init = true;
+$(function () {
     var App = {
-        init : function() {
-            Quagga.init(this.state, function(err) {
+        init: function () {
+            Quagga.init(this.state, function (err) {
                 if (err) {
                     console.log(err);
                     return;
@@ -11,16 +12,14 @@ $(function() {
                 Quagga.start();
             });
         },
-        checkCapabilities: function() {
+        checkCapabilities: function () {
             var track = Quagga.CameraAccess.getActiveTrack();
             var capabilities = {};
             if (typeof track.getCapabilities === 'function') {
                 capabilities = track.getCapabilities();
             }
-            this.applySettingsVisibility('zoom', capabilities.zoom);
-            this.applySettingsVisibility('torch', capabilities.torch);
         },
-        updateOptionsForMediaRange: function(node, range) {
+        updateOptionsForMediaRange: function (node, range) {
             console.log('updateOptionsForMediaRange', node, range);
             var NUM_STEPS = 6;
             var stepSize = (range.max - range.min) / NUM_STEPS;
@@ -37,7 +36,7 @@ $(function() {
                 node.appendChild(option);
             }
         },
-        applySettingsVisibility: function(setting, capability) {
+        applySettingsVisibility: function (setting, capability) {
             // depending on type of capability
             if (typeof capability === 'boolean') {
                 var node = document.querySelector('input[name="settings_' + setting + '"]');
@@ -55,57 +54,61 @@ $(function() {
                 return;
             }
         },
-        initCameraSelection: function(){
+        initCameraSelection: function () {
             var streamLabel = Quagga.CameraAccess.getActiveStreamLabel();
 
             return Quagga.CameraAccess.enumerateVideoDevices()
-            .then(function(devices) {
-                function pruneText(text) {
-                    return text.length > 30 ? text.substr(0, 30) : text;
-                }
-                var $deviceSelection = document.getElementById("deviceSelection");
-                while ($deviceSelection.firstChild) {
-                    $deviceSelection.removeChild($deviceSelection.firstChild);
-                }
-                devices.forEach(function(device) {
-                    var $option = document.createElement("option");
-                    $option.value = device.deviceId || device.id;
-                    $option.appendChild(document.createTextNode(pruneText(device.label || device.deviceId || device.id)));
-                    $option.selected = streamLabel === device.label;
-                    $deviceSelection.appendChild($option);
+                .then(function (devices) {
+                    function pruneText(text) {
+                        return text.length > 30 ? text.substr(0, 30) : text;
+                    }
+                    var $deviceSelection = document.getElementById("deviceSelection");
+                    while ($deviceSelection.firstChild) {
+                        $deviceSelection.removeChild($deviceSelection.firstChild);
+                    }
+                    devices.forEach(function (device) {
+                        var $option = document.createElement("option");
+                        $option.value = device.deviceId || device.id;
+                        $option.appendChild(document.createTextNode(pruneText(device.label || device.deviceId || device.id)));
+                        $option.selected = streamLabel === device.label;
+                        $deviceSelection.appendChild($option);
+                    });
                 });
-            });
         },
-        attachListeners: function() {
+        attachListeners: function () {
             var self = this;
+
+            // $(document).ready(function () {
+            //     if(init){
+            //         self.setState("decoder.readers", "ean");
+            //         init = false;
+            //     }
+            // });
 
             self.initCameraSelection();
 
-            //TODO:
-            // self.setState({'decoder.readers': [{"format":"ean_reader","config":{}}]});
-
-            $(".controls").on("click", "button.stop", function(e) {
+            $(".controls").on("click", "button.stop", function (e) {
                 e.preventDefault();
                 Quagga.stop();
             });
 
-            $(".controls .reader-config-group").on("change", "input, select", function(e) {
+            $(".controls .reader-config-group").on("change", "input, select", function (e) {
                 e.preventDefault();
                 var $target = $(e.target),
                     value = $target.attr("type") === "checkbox" ? $target.prop("checked") : $target.val(),
                     name = $target.attr("name"),
                     state = self._convertNameToState(name);
 
-                console.log("Value of "+ state + " changed to " + value);
+                console.log("Value of " + state + " changed to " + value);
                 self.setState(state, value);
             });
         },
-        _accessByPath: function(obj, path, val) {
+        _accessByPath: function (obj, path, val) {
             var parts = path.split('.'),
                 depth = parts.length,
                 setter = (typeof val !== "undefined") ? true : false;
 
-            return parts.reduce(function(o, key, i) {
+            return parts.reduce(function (o, key, i) {
                 if (setter && (i + 1) === depth) {
                     if (typeof o[key] === "object" && typeof val === "object") {
                         Object.assign(o[key], val);
@@ -116,27 +119,16 @@ $(function() {
                 return key in o ? o[key] : {};
             }, obj);
         },
-        _convertNameToState: function(name) {
-            return name.replace("_", ".").split("-").reduce(function(result, value) {
+        _convertNameToState: function (name) {
+            return name.replace("_", ".").split("-").reduce(function (result, value) {
                 return result + value.charAt(0).toUpperCase() + value.substring(1);
             });
         },
-        detachListeners: function() {
+        detachListeners: function () {
             $(".controls").off("click", "button.stop");
             $(".controls .reader-config-group").off("change", "input, select");
         },
-        applySetting: function(setting, value) {
-            var track = Quagga.CameraAccess.getActiveTrack();
-            if (track && typeof track.getCapabilities === 'function') {
-                switch (setting) {
-                case 'zoom':
-                    return track.applyConstraints({advanced: [{zoom: parseFloat(value)}]});
-                case 'torch':
-                    return track.applyConstraints({advanced: [{torch: !!value}]});
-                }
-            }
-        },
-        setState: function(path, value) {
+        setState: function (path, value) {
             var self = this;
 
             if (typeof self._accessByPath(self.inputMapper, path) === "function") {
@@ -156,12 +148,16 @@ $(function() {
         },
         inputMapper: {
             inputStream: {
-                constraints: function(value){
+                constraints: function (value) {
                     if (/^(\d+)x(\d+)$/.test(value)) {
                         var values = value.split('x');
                         return {
-                            width: {min: parseInt(values[0])},
-                            height: {min: parseInt(values[1])}
+                            width: {
+                                min: parseInt(values[0])
+                            },
+                            height: {
+                                min: parseInt(values[1])
+                            }
                         };
                     }
                     return {
@@ -169,11 +165,11 @@ $(function() {
                     };
                 }
             },
-            numOfWorkers: function(value) {
+            numOfWorkers: function (value) {
                 return parseInt(value);
             },
             decoder: {
-                readers: function(value) {
+                readers: function (value) {
                     if (value === 'ean_extended') {
                         return [{
                             format: "ean_reader",
@@ -193,11 +189,18 @@ $(function() {
         },
         state: {
             inputStream: {
-                type : "LiveStream",
+                type: "LiveStream",
                 constraints: {
-                    width: {min: 640},
-                    height: {min: 480},
-                    aspectRatio: {min: 1, max: 100},
+                    width: {
+                        min: 640
+                    },
+                    height: {
+                        min: 480
+                    },
+                    aspectRatio: {
+                        min: 1,
+                        max: 100
+                    },
                     facingMode: "environment" // or user
                 }
             },
@@ -208,19 +211,19 @@ $(function() {
             numOfWorkers: 2,
             frequency: 10,
             decoder: {
-                readers : [{
+                readers: [{
                     format: "code_128_reader",
                     config: {}
                 }]
             },
             locate: true
         },
-        lastResult : null
+        lastResult: null
     };
 
     App.init();
 
-    Quagga.onProcessed(function(result) {
+    Quagga.onProcessed(function (result) {
         var drawingCtx = Quagga.canvas.ctx.overlay,
             drawingCanvas = Quagga.canvas.dom.overlay;
 
@@ -230,26 +233,45 @@ $(function() {
                 result.boxes.filter(function (box) {
                     return box !== result.box;
                 }).forEach(function (box) {
-                    Quagga.ImageDebug.drawPath(box, {x: 0, y: 1}, drawingCtx, {color: "green", lineWidth: 2});
+                    Quagga.ImageDebug.drawPath(box, {
+                        x: 0,
+                        y: 1
+                    }, drawingCtx, {
+                        color: "green",
+                        lineWidth: 2
+                    });
                 });
             }
 
             if (result.box) {
-                Quagga.ImageDebug.drawPath(result.box, {x: 0, y: 1}, drawingCtx, {color: "#00F", lineWidth: 2});
+                Quagga.ImageDebug.drawPath(result.box, {
+                    x: 0,
+                    y: 1
+                }, drawingCtx, {
+                    color: "#00F",
+                    lineWidth: 2
+                });
             }
 
             if (result.codeResult && result.codeResult.code) {
-                Quagga.ImageDebug.drawPath(result.line, {x: 'x', y: 'y'}, drawingCtx, {color: 'red', lineWidth: 3});
+                Quagga.ImageDebug.drawPath(result.line, {
+                    x: 'x',
+                    y: 'y'
+                }, drawingCtx, {
+                    color: 'red',
+                    lineWidth: 3
+                });
             }
         }
     });
 
-    Quagga.onDetected(function(result) {
+    Quagga.onDetected(function (result) {
         var code = result.codeResult.code;
 
         if (App.lastResult !== code) {
             App.lastResult = code;
-            var $node = null, canvas = Quagga.canvas.dom.image;
+            var $node = null,
+                canvas = Quagga.canvas.dom.image;
 
             $node = $('<li><div class="thumbnail"><div class="imgWrapper"><img /></div><div class="caption"><h4 class="code"></h4></div></div></li>');
             $node.find("img").attr("src", canvas.toDataURL());
